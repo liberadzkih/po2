@@ -1,0 +1,66 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.Socket;
+import java.util.Queue;
+
+public class ServerThread implements Runnable {
+
+	Server server;
+	Socket socket;
+	BufferedReader bufferedReader;
+	PrintStream printStream;
+	int clientID;
+	Queue<Message> queue;
+
+	ServerThread(int ID, Socket socket, Server server, Queue<Message> queue) throws IOException {
+		this.server = server;
+		this.socket = socket;
+		this.clientID = ID;
+		this.queue = queue;
+		bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		printStream = new PrintStream(socket.getOutputStream());
+	}
+
+	@Override
+	public void run() {
+		String str;
+
+		try {
+			while (true) {
+				str = bufferedReader.readLine();
+				// Jezeli klient chce siê roz³¹czyæ
+				if (str.equalsIgnoreCase("q")) {
+					System.out.println("Client " + clientID + " has disconnected");
+					break;
+				}
+
+				// Wyswietlanie notyf. od danego klienta.
+				System.out.println("Client " + clientID + ": " + str);
+
+				// Dodawanie wiadomosci do kolejki z priorytetem
+				queue.add(new Message(clientID, str));
+
+				/*
+				 * je¿eli element klasy Message który jest na pocz¹tku kolejki nie nale¿y do
+				 * danego klienta...
+				 */
+				while (!queue.element().isItTime(clientID)) {
+					Thread.sleep(500);
+				}
+
+				// Wysylanie notyf. do klienta, i usuwanie jej z kolejki
+				printStream.println(queue.remove().getString());
+			}
+			printStream.close();
+			socket.close();
+			bufferedReader.close();
+
+		} catch (IOException | InterruptedException e) {
+			System.out.println("Client " + clientID + " has disconnected.");
+		}
+
+	}
+
+}
