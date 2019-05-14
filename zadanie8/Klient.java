@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Scanner;
 
 public class Klient {
@@ -23,7 +25,7 @@ public class Klient {
 			Socket socket = new Socket(IP, PORT);
 			System.out.println("Po³¹czono do: " + socket);
 
-			printWriter = new PrintWriter(socket.getOutputStream());
+			printWriter = new PrintWriter(socket.getOutputStream(), true);
 			bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 			while (true) {
@@ -33,13 +35,11 @@ public class Klient {
 
 					if (str.equalsIgnoreCase("q")) {
 						printWriter.println(str);
-						printWriter.flush();
 						System.out.println("Connection ended by client");
 						break;
 					}
 					if (checkTimeInNotification(str)) {
 						printWriter.println(str);
-						printWriter.flush();
 						System.out.println("The notification was sent to the server.\nWaiting for response.");
 					}
 
@@ -48,7 +48,7 @@ public class Klient {
 
 				} catch (WrongContentOfNotificationException e) {
 					e.printStackTrace(System.err);
-					System.err.println(e.getString() + " doesn't match HH:MM");
+					System.err.println(e.toString() + " doesn't match HH:MM");
 				}
 
 			}
@@ -67,9 +67,27 @@ public class Klient {
 		if (s.length() <= 5)
 			throw new WrongContentOfNotificationException("Wrong time in notifiaction", s);
 
-		if (s.substring(0, 5).matches("^(([0-1]{0,1}[0-9])|(2[0-3])):[0-5]{0,1}[0-9]$"))
+		if (s.substring(0, 5).matches("^(([0-1]{0,1}[0-9])|(2[0-3])):[0-5]{0,1}[0-9]$") && !timePassed(s))
 			return true;
 		else
 			throw new WrongContentOfNotificationException("Wrong time in notification", s.substring(0, 5));
+	}
+
+	public boolean timePassed(String s) {
+
+		String actualTime = ZonedDateTime.now(ZoneId.of("Europe/Warsaw")).toString();
+		String actualHour = actualTime.substring(11, 13);
+		String actualMinutes = actualTime.substring(14, 16);
+		
+		// aktualny czas w minutach
+		int time1 = Integer.parseInt(actualHour) * 60 + Integer.parseInt(actualMinutes);
+		// czas z notyfikacji w minutach
+		int time2 = Integer.parseInt(s.substring(0, 2)) * 60 + Integer.parseInt(s.substring(3, 5));
+
+		if (time1 > time2){
+			System.out.println("time passed");
+			return true;
+		} else
+			return false;
 	}
 }

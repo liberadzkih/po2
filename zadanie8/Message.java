@@ -3,7 +3,7 @@ import java.time.ZonedDateTime;
 
 public class Message {
 	int id;
-	String time;
+	String time; // HH:MM
 	String msg;
 
 	Message(int id, String s) {
@@ -12,9 +12,11 @@ public class Message {
 		this.msg = s;
 	}
 
-	public String getString() {
+	@Override
+	public String toString() {
 		return msg;
 	}
+	
 
 	public boolean checkTime() {
 		if (ZonedDateTime.now(ZoneId.of("Europe/Warsaw")).toString().substring(11, 16).equalsIgnoreCase(time))

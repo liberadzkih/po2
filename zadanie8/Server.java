@@ -9,7 +9,7 @@ public class Server {
 	int port = 5010;
 	int clientCount = 0;
 	Comparator<Message> comparator = new QueueTimeComparator();
-	Queue<Message> queue = new PriorityQueue<Message>(10, comparator);
+	Queue<Message> queue = new PriorityQueue<Message>(comparator);
 
 	public static void main(String[] args) {
 		Server server = new Server();
@@ -23,7 +23,7 @@ public class Server {
 			System.out.println("Server started.");
 			while (true) {
 				// oczekiwanie na polaczenie i tworzenie gniazda sieciowego
-				Socket socket = serverSocket.accept(); // akceptuje wszystkie polaczenia na porcie 5000
+				Socket socket = serverSocket.accept(); // akceptuje wszystkie polaczenia na porcie 5010
 				System.out.println("Listening: " + serverSocket);
 				System.out.println("Connected: " + socket);
 				clientCount++;

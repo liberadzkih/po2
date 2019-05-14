@@ -30,28 +30,22 @@ public class ServerThread implements Runnable {
 		try {
 			while (true) {
 				str = bufferedReader.readLine();
-				// Jezeli klient chce siê roz³¹czyæ
+
 				if (str.equalsIgnoreCase("q")) {
 					System.out.println("Client " + clientID + " has disconnected");
 					break;
 				}
 
-				// Wyswietlanie notyf. od danego klienta.
 				System.out.println("Client " + clientID + ": " + str);
 
-				// Dodawanie wiadomosci do kolejki z priorytetem
 				queue.add(new Message(clientID, str));
 
-				/*
-				 * je¿eli element klasy Message który jest na pocz¹tku kolejki nie nale¿y do
-				 * danego klienta...
-				 */
 				while (!queue.element().isItTime(clientID)) {
-					Thread.sleep(500);
+					Thread.sleep(10000);
 				}
 
-				// Wysylanie notyf. do klienta, i usuwanie jej z kolejki
-				printStream.println(queue.remove().getString());
+				printStream.println(queue.remove().toString());
+
 			}
 			printStream.close();
 			socket.close();

@@ -11,7 +11,8 @@ class WrongContentOfNotificationException extends Exception {
 		this.string = s;
 	}
 
-	public String getString() {
+	@Override
+	public String toString() {
 		return string;
 	}
 }
